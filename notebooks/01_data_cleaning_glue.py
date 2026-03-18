@@ -3,7 +3,7 @@ from awsglue.context import GlueContext
 from awsglue.job import Job
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
-from pyspark.sql.functions import col, to_date
+from pyspark.sql.functions import col, to_date, trim
 
 BUCKET_NAME = "ecommerce-data-pipeline-jayant"
 RAW_PATH = f"s3://{BUCKET_NAME}/raw/sales_data.csv"
@@ -20,11 +20,17 @@ df_raw = spark.read.option("header", "true").csv(RAW_PATH)
 
 df_clean = (
     df_raw
+    .withColumn("Order ID", trim(col("Order ID")))
+    .withColumn("Customer ID", trim(col("Customer ID")))
+    .withColumn("Product ID", trim(col("Product ID")))
     .withColumn("Order_Date", to_date(col("Order Date"), "MM/dd/yyyy"))
     .withColumn("Ship_Date", to_date(col("Ship Date"), "MM/dd/yyyy"))
     .withColumn("Sales", col("Sales").cast("double"))
+    .withColumn("Quantity", col("Quantity").cast("int"))
+    .withColumn("Discount", col("Discount").cast("double"))
     .withColumn("Profit", col("Profit").cast("double"))
-    .dropna(subset=["Order ID", "Sales", "Profit"])
+    .dropna(subset=["Order ID", "Customer ID", "Product ID", "Order_Date", "Sales", "Profit"])
+    .dropDuplicates(["Order ID", "Product ID"])
 )
 
 df_clean.write.mode("overwrite").parquet(STAGING_PATH)
