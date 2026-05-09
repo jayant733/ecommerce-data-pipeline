@@ -1,0 +1,13 @@
+{
+  "s3_bucket": "ecommerce-data-pipeline-jayant",
+  "paths": {
+    "raw": "raw/sales_data.csv",
+    "staging": "staging/sales/",
+    "curated": "curated/sales/",
+    "dimensions": "warehouse/dimensions/",
+    "facts": "warehouse/facts/",
+    "analytics": "warehouse/analytics/"
+  },
+  "date_format": "MM/dd/yyyy",
+  "output_format": "parquet"
+}
